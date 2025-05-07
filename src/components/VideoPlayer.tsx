@@ -42,6 +42,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
                 await (videoElement as any).webkitRequestFullscreen();
               } else if ((videoElement as any).mozRequestFullScreen) {
                 await (videoElement as any).mozRequestFullScreen();
+              } else if ((videoElement as any).webkitEnterFullscreen) {
+                await (videoElement as any).webkitEnterFullscreen();
               }
             }
           } else {
@@ -80,6 +82,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
               await (videoElement as any).webkitRequestFullscreen();
             } else if ((videoElement as any).mozRequestFullScreen) {
               await (videoElement as any).mozRequestFullScreen();
+            } else if ((videoElement as any).webkitEnterFullscreen) {
+              await (videoElement as any).webkitEnterFullscreen();
             }
           }
         } else {
@@ -142,6 +146,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
       showinfo: 0,
       controls: 1,
       playsinline: 1,
+      fs: 1,
     },
   };
 
@@ -149,13 +154,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
     <Box
       ref={containerRef}
       sx={{
-        position: 'relative',
-        width: '100%',
-        height: isMobile ? '100vh' : '80vh',
-        maxHeight: isMobile ? '100vh' : '80vh',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: '100vw',
+        height: '100vh',
         backgroundColor: 'black',
         overflow: 'hidden',
         touchAction: 'none',
+        zIndex: 9999,
       }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
