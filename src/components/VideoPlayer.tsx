@@ -27,7 +27,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
+  // Enter fullscreen mode when component mounts
   useEffect(() => {
+    const enterFullscreen = async () => {
+      if (containerRef.current && !document.fullscreenElement) {
+        try {
+          await containerRef.current.requestFullscreen();
+          setIsFullscreen(true);
+        } catch (error) {
+          console.error('Error entering fullscreen:', error);
+        }
+      }
+    };
+
+    enterFullscreen();
+
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
