@@ -21,6 +21,7 @@ interface VideoPlayerProps {
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, onClose }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -33,7 +34,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
       if (containerRef.current && !document.fullscreenElement) {
         try {
           if (isMobile) {
-            // For mobile devices, try to enter fullscreen using the video element
             const videoElement = containerRef.current.querySelector('iframe');
             if (videoElement) {
               if (videoElement.requestFullscreen) {
@@ -136,6 +136,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
     touchStartY.current = null;
   };
 
+  const onReady = (event: any) => {
+    playerRef.current = event.target;
+    // Force play the video
+    event.target.playVideo();
+    // Set volume to maximum
+    event.target.setVolume(100);
+  };
+
   const opts = {
     height: '100%',
     width: '100%',
@@ -151,11 +159,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
       enablejsapi: 1,
       origin: window.location.origin,
     },
-  };
-
-  const onReady = (event: any) => {
-    // Start playing immediately when the player is ready
-    event.target.playVideo();
   };
 
   return (
@@ -205,7 +208,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
         sx={{
           position: 'absolute',
           top: 16,
-          right: 16,
+          left: 16,
           display: 'flex',
           gap: 1,
           zIndex: 2,
