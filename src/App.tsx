@@ -223,14 +223,22 @@ function App() {
       <CssBaseline />
       <Container maxWidth="md" sx={{ py: 4 }}>
         {/* Filter Bar */}
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-          <ButtonGroup variant="text" sx={{ gap: 2, background: 'transparent' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, overflowX: 'auto' }}>
+          <ButtonGroup
+            variant="text"
+            sx={{
+              gap: 2,
+              background: 'transparent',
+              flexWrap: 'nowrap',
+              minWidth: 'max-content',
+            }}
+          >
             {sections.map((section) => (
               <Button
                 key={section.name}
                 onClick={() => {
-                  setSelectedSection(section.name)
-                  setSelectedVideoIndex(null)
+                  setSelectedSection(section.name);
+                  setSelectedVideoIndex(null);
                 }}
                 sx={{
                   borderRadius: 4,
@@ -242,6 +250,7 @@ function App() {
                   color: selectedSection === section.name ? '#222' : '#888',
                   boxShadow: selectedSection === section.name ? '0 2px 8px #eee' : 'none',
                   textTransform: 'none',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {section.name}

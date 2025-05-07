@@ -80,9 +80,11 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ videos, onSelectVideo }) =>
                   color: '#222',
                   mt: 1,
                   mb: 0,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
+                  overflow: 'visible',
+                  textOverflow: 'unset',
+                  whiteSpace: 'normal',
+                  display: 'block',
+                  wordBreak: 'break-word',
                 }}
               >
                 {video.title}
