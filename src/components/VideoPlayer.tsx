@@ -147,7 +147,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
       controls: 1,
       playsinline: 1,
       fs: 1,
+      mute: 0,
+      enablejsapi: 1,
+      origin: window.location.origin,
     },
+  };
+
+  const onReady = (event: any) => {
+    // Start playing immediately when the player is ready
+    event.target.playVideo();
   };
 
   return (
@@ -183,6 +191,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
         <YouTube
           videoId={video.id}
           opts={opts}
+          onReady={onReady}
           style={{
             position: 'absolute',
             top: 0,
