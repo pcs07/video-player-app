@@ -7,41 +7,29 @@ import './App.css'
 // Your curated YouTube Shorts videos
 const sampleVideos = [
   {
-    id: 'dQw4w9WgXcQ',
-    title: 'Never Gonna Give You Up',
-    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-    thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/maxresdefault.jpg'
+    id: 'W2b9L8EfSws',
+    title: 'Introduction to YT Shorts',
+    url: 'https://youtube.com/shorts/W2b9L8EfSws',
+    thumbnail: 'https://img.youtube.com/vi/W2b9L8EfSws/maxresdefault.jpg'
   },
   {
-    id: 'jNQXAC9IVRw',
-    title: 'Me at the zoo',
-    url: 'https://www.youtube.com/watch?v=jNQXAC9IVRw',
-    thumbnail: 'https://img.youtube.com/vi/jNQXAC9IVRw/maxresdefault.jpg'
+    id: 'f4JBa07OoRg',
+    title: 'Intro in Hindi',
+    url: 'https://youtube.com/shorts/f4JBa07OoRg',
+    thumbnail: 'https://img.youtube.com/vi/f4JBa07OoRg/maxresdefault.jpg'
   },
   {
-    id: 'kJQP7kiw5Fk',
-    title: 'Despacito',
-    url: 'https://www.youtube.com/watch?v=kJQP7kiw5Fk',
-    thumbnail: 'https://img.youtube.com/vi/kJQP7kiw5Fk/maxresdefault.jpg'
+    id: 'g4NNzON_1m4',
+    title: 'Asking Puja for evening walk',
+    url: 'https://youtube.com/shorts/g4NNzON_1m4',
+    thumbnail: 'https://img.youtube.com/vi/g4NNzON_1m4/maxresdefault.jpg'
   },
   {
-    id: '9bZkp7q19f0',
-    title: 'PSY - Gangnam Style',
-    url: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
-    thumbnail: 'https://img.youtube.com/vi/9bZkp7q19f0/maxresdefault.jpg'
-  },
-  {
-    id: 'OPf0YbXqDm0',
-    title: 'Mark Ronson - Uptown Funk ft. Bruno Mars',
-    url: 'https://www.youtube.com/watch?v=OPf0YbXqDm0',
-    thumbnail: 'https://img.youtube.com/vi/OPf0YbXqDm0/maxresdefault.jpg'
-  },
-  {
-    id: 'hT_nvWreIhg',
-    title: 'OneRepublic - Counting Stars',
-    url: 'https://www.youtube.com/watch?v=hT_nvWreIhg',
-    thumbnail: 'https://img.youtube.com/vi/hT_nvWreIhg/maxresdefault.jpg'
-  },
+    id: '0KiedK3NtFM',
+    title: "Puja's response",
+    url: 'https://youtube.com/shorts/0KiedK3NtFM',
+    thumbnail: 'https://img.youtube.com/vi/0KiedK3NtFM/maxresdefault.jpg'
+  }
 ]
 
 const theme = createTheme({
