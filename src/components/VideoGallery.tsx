@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Paper, Avatar } from '@mui/material';
+import { Box, Typography, Paper, Avatar, useTheme, useMediaQuery } from '@mui/material';
 
 interface Video {
   id: string;
@@ -14,17 +14,24 @@ interface VideoGalleryProps {
 }
 
 const VideoGallery: React.FC<VideoGalleryProps> = ({ videos, onSelectVideo }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
-    <Paper elevation={3} sx={{ p: 4, maxWidth: 800, margin: '0 auto' }}>
-      <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4 }}>
+    <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, maxWidth: 800, margin: '0 auto' }}>
+      <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
         My YouTube Shorts Collection
       </Typography>
       <Box sx={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        gap: 4, 
+        display: 'grid',
+        gridTemplateColumns: {
+          xs: 'repeat(2, 1fr)',
+          sm: 'repeat(3, 1fr)',
+          md: 'repeat(4, 1fr)'
+        },
+        gap: { xs: 2, sm: 4 },
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'start'
       }}>
         {videos.map((video, index) => (
           <Box
@@ -45,8 +52,8 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ videos, onSelectVideo }) =>
               src={video.thumbnail}
               alt={video.title}
               sx={{
-                width: 150,
-                height: 150,
+                width: { xs: 120, sm: 150 },
+                height: { xs: 120, sm: 150 },
                 border: '3px solid',
                 borderColor: 'primary.main',
               }}
@@ -56,10 +63,15 @@ const VideoGallery: React.FC<VideoGalleryProps> = ({ videos, onSelectVideo }) =>
               sx={{
                 mt: 2,
                 textAlign: 'center',
-                maxWidth: 150,
+                maxWidth: { xs: 120, sm: 150 },
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
+                whiteSpace: isMobile ? 'normal' : 'nowrap',
+                display: '-webkit-box',
+                WebkitLineClamp: isMobile ? 3 : 1,
+                WebkitBoxOrient: 'vertical',
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                lineHeight: 1.2,
               }}
             >
               {video.title}

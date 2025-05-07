@@ -1,8 +1,8 @@
-import React, { useState, useRef } from 'react';
-import type { TouchEvent } from 'react';
-import ReactPlayer from 'react-player';
-import { Box, IconButton, Typography, Paper } from '@mui/material';
-import { PlayArrow, Pause, SkipNext, SkipPrevious, Close } from '@mui/icons-material';
+import React, { useRef, useEffect, useState } from 'react';
+import { Box, IconButton, useTheme, useMediaQuery } from '@mui/material';
+import YouTube from 'react-youtube';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
 interface Video {
   id: string;
@@ -12,105 +12,141 @@ interface Video {
 }
 
 interface VideoPlayerProps {
-  videos: Video[];
-  currentVideoIndex: number;
-  onClose: () => void;
+  video: Video;
+  onNext: () => void;
+  onPrevious: () => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videos, currentVideoIndex: initialIndex, onClose }) => {
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(initialIndex);
-  const [playing, setPlaying] = useState(false);
-  const touchStartX = useRef<number | null>(null);
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handlePlayPause = () => {
-    setPlaying(!playing);
-  };
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
 
-  const handleNext = () => {
-    setCurrentVideoIndex((prevIndex) => 
-      prevIndex === videos.length - 1 ? 0 : prevIndex + 1
-    );
-  };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
 
-  const handlePrevious = () => {
-    setCurrentVideoIndex((prevIndex) => 
-      prevIndex === 0 ? videos.length - 1 : prevIndex - 1
-    );
-  };
+  const handleFullscreen = async () => {
+    if (!containerRef.current) return;
 
-  const handleTouchStart = (e: TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: TouchEvent) => {
-    if (touchStartX.current === null) return;
-
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX;
-
-    // Minimum swipe distance (in pixels)
-    const minSwipeDistance = 50;
-
-    if (Math.abs(diff) > minSwipeDistance) {
-      if (diff > 0) {
-        // Swipe left - next video
-        handleNext();
-      } else {
-        // Swipe right - previous video
-        handlePrevious();
+    if (!document.fullscreenElement) {
+      try {
+        await containerRef.current.requestFullscreen();
+        setIsFullscreen(true);
+      } catch (error) {
+        console.error('Error entering fullscreen:', error);
+      }
+    } else {
+      try {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      } catch (error) {
+        console.error('Error exiting fullscreen:', error);
       }
     }
+  };
 
-    touchStartX.current = null;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touch = e.changedTouches[0];
+      const endX = touch.clientX;
+      const endY = touch.clientY;
+      
+      const deltaX = endX - startX;
+      const deltaY = endY - startY;
+      
+      // Only trigger swipe if horizontal movement is greater than vertical
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 50) {
+          onPrevious();
+        } else if (deltaX < -50) {
+          onNext();
+        }
+      }
+      
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+
+    document.addEventListener('touchend', handleTouchEnd);
+  };
+
+  const opts = {
+    height: '100%',
+    width: '100%',
+    playerVars: {
+      autoplay: 1,
+      modestbranding: 1,
+      rel: 0,
+      showinfo: 0,
+      controls: 1,
+      playsinline: 1,
+    },
   };
 
   return (
-    <Box sx={{ maxWidth: 800, margin: '0 auto', p: 2 }}>
-      <Paper elevation={3} sx={{ p: 2, mb: 2, position: 'relative' }}>
-        <IconButton
-          onClick={onClose}
-          sx={{
+    <Box
+      ref={containerRef}
+      sx={{
+        position: 'relative',
+        width: '100%',
+        height: isMobile ? '100vh' : '80vh',
+        maxHeight: isMobile ? '100vh' : '80vh',
+        backgroundColor: 'black',
+        overflow: 'hidden',
+        touchAction: 'none',
+      }}
+      onTouchStart={handleTouchStart}
+    >
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1,
+        }}
+      >
+        <YouTube
+          videoId={video.id}
+          opts={opts}
+          style={{
             position: 'absolute',
-            right: 8,
-            top: 8,
-            zIndex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-            },
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
           }}
-        >
-          <Close />
-        </IconButton>
-        <Typography variant="h5" gutterBottom>
-          {videos[currentVideoIndex]?.title}
-        </Typography>
-        <Box 
-          sx={{ position: 'relative', paddingTop: '56.25%' }}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          <ReactPlayer
-            url={videos[currentVideoIndex]?.url}
-            playing={playing}
-            controls={false}
-            width="100%"
-            height="100%"
-            style={{ position: 'absolute', top: 0, left: 0 }}
-          />
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, gap: 2 }}>
-          <IconButton onClick={handlePrevious} size="large">
-            <SkipPrevious />
-          </IconButton>
-          <IconButton onClick={handlePlayPause} size="large">
-            {playing ? <Pause /> : <PlayArrow />}
-          </IconButton>
-          <IconButton onClick={handleNext} size="large">
-            <SkipNext />
-          </IconButton>
-        </Box>
-      </Paper>
+        />
+      </Box>
+      <IconButton
+        onClick={handleFullscreen}
+        sx={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          color: 'white',
+          '&:hover': {
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          },
+          zIndex: 2,
+        }}
+      >
+        {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+      </IconButton>
     </Box>
   );
 };
