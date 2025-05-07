@@ -32,7 +32,21 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
     const enterFullscreen = async () => {
       if (containerRef.current && !document.fullscreenElement) {
         try {
-          await containerRef.current.requestFullscreen();
+          if (isMobile) {
+            // For mobile devices, try to enter fullscreen using the video element
+            const videoElement = containerRef.current.querySelector('iframe');
+            if (videoElement) {
+              if (videoElement.requestFullscreen) {
+                await videoElement.requestFullscreen();
+              } else if ((videoElement as any).webkitRequestFullscreen) {
+                await (videoElement as any).webkitRequestFullscreen();
+              } else if ((videoElement as any).mozRequestFullScreen) {
+                await (videoElement as any).mozRequestFullScreen();
+              }
+            }
+          } else {
+            await containerRef.current.requestFullscreen();
+          }
           setIsFullscreen(true);
         } catch (error) {
           console.error('Error entering fullscreen:', error);
@@ -50,14 +64,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, []);
+  }, [isMobile]);
 
   const handleFullscreen = async () => {
     if (!containerRef.current) return;
 
     if (!document.fullscreenElement) {
       try {
-        await containerRef.current.requestFullscreen();
+        if (isMobile) {
+          const videoElement = containerRef.current.querySelector('iframe');
+          if (videoElement) {
+            if (videoElement.requestFullscreen) {
+              await videoElement.requestFullscreen();
+            } else if ((videoElement as any).webkitRequestFullscreen) {
+              await (videoElement as any).webkitRequestFullscreen();
+            } else if ((videoElement as any).mozRequestFullScreen) {
+              await (videoElement as any).mozRequestFullScreen();
+            }
+          }
+        } else {
+          await containerRef.current.requestFullscreen();
+        }
         setIsFullscreen(true);
       } catch (error) {
         console.error('Error entering fullscreen:', error);
@@ -77,11 +104,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
     touchStartY.current = e.touches[0].clientY;
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleTouchMove = (e: React.TouchEvent) => {
     if (touchStartX.current === null || touchStartY.current === null) return;
 
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
+    const touchEndX = e.touches[0].clientX;
+    const touchEndY = e.touches[0].clientY;
     
     const deltaX = touchEndX - touchStartX.current;
     const deltaY = touchEndY - touchStartY.current;
@@ -90,11 +117,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
       if (deltaX > 50) {
         onPrevious();
+        touchStartX.current = null;
+        touchStartY.current = null;
       } else if (deltaX < -50) {
         onNext();
+        touchStartX.current = null;
+        touchStartY.current = null;
       }
     }
-    
+  };
+
+  const handleTouchEnd = () => {
     touchStartX.current = null;
     touchStartY.current = null;
   };
@@ -125,6 +158,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, on
         touchAction: 'none',
       }}
       onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       <Box
