@@ -3,6 +3,7 @@ import { Box, IconButton, useTheme, useMediaQuery } from '@mui/material';
 import YouTube from 'react-youtube';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import CloseIcon from '@mui/icons-material/Close';
 
 interface Video {
   id: string;
@@ -15,13 +16,16 @@ interface VideoPlayerProps {
   video: Video;
   onNext: () => void;
   onPrevious: () => void;
+  onClose: () => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious, onClose }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -55,31 +59,30 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious }) 
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    const startX = touch.clientX;
-    const startY = touch.clientY;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      const touch = e.changedTouches[0];
-      const endX = touch.clientX;
-      const endY = touch.clientY;
-      
-      const deltaX = endX - startX;
-      const deltaY = endY - startY;
-      
-      // Only trigger swipe if horizontal movement is greater than vertical
-      if (Math.abs(deltaX) > Math.abs(deltaY)) {
-        if (deltaX > 50) {
-          onPrevious();
-        } else if (deltaX < -50) {
-          onNext();
-        }
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const deltaX = touchEndX - touchStartX.current;
+    const deltaY = touchEndY - touchStartY.current;
+    
+    // Only trigger swipe if horizontal movement is greater than vertical
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 50) {
+        onPrevious();
+      } else if (deltaX < -50) {
+        onNext();
       }
-      
-      document.removeEventListener('touchend', handleTouchEnd);
-    };
-
-    document.addEventListener('touchend', handleTouchEnd);
+    }
+    
+    touchStartX.current = null;
+    touchStartY.current = null;
   };
 
   const opts = {
@@ -108,6 +111,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious }) 
         touchAction: 'none',
       }}
       onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       <Box
         sx={{
@@ -131,22 +135,41 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ video, onNext, onPrevious }) 
           }}
         />
       </Box>
-      <IconButton
-        onClick={handleFullscreen}
+      <Box
         sx={{
           position: 'absolute',
           top: 16,
           right: 16,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          color: 'white',
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          },
+          display: 'flex',
+          gap: 1,
           zIndex: 2,
         }}
       >
-        {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
-      </IconButton>
+        <IconButton
+          onClick={handleFullscreen}
+          sx={{
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            },
+          }}
+        >
+          {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+        </IconButton>
+        <IconButton
+          onClick={onClose}
+          sx={{
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            },
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </Box>
     </Box>
   );
 };

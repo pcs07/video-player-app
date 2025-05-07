@@ -67,6 +67,10 @@ function App() {
     )
   }
 
+  const handleCloseVideo = () => {
+    setSelectedVideoIndex(null)
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -76,6 +80,7 @@ function App() {
             video={sampleVideos[selectedVideoIndex]}
             onNext={handleNextVideo}
             onPrevious={handlePreviousVideo}
+            onClose={handleCloseVideo}
           />
         ) : (
           <VideoGallery
